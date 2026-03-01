@@ -86,7 +86,7 @@ class ActiveRecordMetaData
      * @throws DbException
      * @since 1.1.2
      */
-    public function addRelation($name, $config)
+    public function addRelation(string $name, array $config): void
     {
         if (isset($config[0], $config[1], $config[2]))  // relation class, AR class, FK
             $this->relations[$name] = new $config[0]($name, $config[1], $config[2], array_slice($config, 3));

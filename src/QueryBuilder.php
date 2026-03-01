@@ -7,12 +7,13 @@ use Yii1x\ActiveRecord\Db\Schema\DbCriteria;
 class QueryBuilder
 {
     public DbCriteria $criteria;
-    protected ConditionBuilder $conditionBuilder;
+    protected ConditionBuilder $conditionBuilder {
+        get => $this->conditionBuilder ?? new ConditionBuilder($this->model, $this->criteria);
+    }
 
     public function __construct(protected ActiveRecord $model)
     {
         $this->criteria = new DbCriteria();
-        $this->conditionBuilder = new ConditionBuilder($this->model, $this->criteria);
     }
 
     public function select(string|array $column): static
@@ -63,7 +64,7 @@ class QueryBuilder
         return $this;
     }
 
-    public function whereRelation(string $relation, \Closure $callback, string $operator = 'AND', string $relAlias = null): static
+    public function whereRelation(string $relation, ?\Closure $callback = null, string $operator = 'AND', string $relAlias = null): static
     {
         $this->conditionBuilder->whereRelation($relation, $callback, $operator, $relAlias);
         return $this;

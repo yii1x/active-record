@@ -103,7 +103,7 @@ class DbCriteria
     /**
      * @var string the alias name of the table. If not set, it means the alias is 't'.
      */
-    public $alias;
+    public $alias = 't';
     /**
      * @var boolean whether the foreign tables should be joined with the primary table in a single SQL.
      * This property is only used in relational AR queries for HAS_MANY and MANY_MANY relations.
