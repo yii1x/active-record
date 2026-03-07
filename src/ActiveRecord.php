@@ -454,7 +454,7 @@ abstract class ActiveRecord extends Model
         if ($dbAttribute = current($reflection->getAttributes(Database::class))) {
             return $dbAttribute->newInstance()->name;
         }
-        return '';
+        return 'default';
     }
 
     /**

@@ -77,7 +77,7 @@ class DbCommand
      * @since 1.1.6
      */
     public array $params = [];
-    private string $_text = '';
+    private ?string $_text = null;
     private ?PDOStatement $_statement = null;
     private array $_paramLog = [];
     private array $_query = [];
@@ -170,10 +170,10 @@ class DbCommand
     /**
      * Specifies the SQL statement to be executed.
      * Any previous execution will be terminated or cancel.
-     * @param string $value the SQL statement to be executed
+     * @param null|string $value the SQL statement to be executed
      * @return static this command instance
      */
-    public function setText(string $value): static
+    public function setText(?string $value): static
     {
         if ($this->_connection->tablePrefix !== null && $value != '')
             $this->_text = preg_replace('/{{(.*?)}}/', $this->_connection->tablePrefix . '\1', $value);

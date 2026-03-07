@@ -71,9 +71,9 @@ abstract class DbSchema
      * @param string $name table name
      * @param boolean $refresh if we need to refresh schema cache for a table.
      * Parameter available since 1.1.9
-     * @return DbTableSchema table metadata. Null if the named table does not exist.
+     * @return null|DbTableSchema table metadata. Null if the named table does not exist.
      */
-    public function getTable(string $name, bool $refresh = false): DbTableSchema
+    public function getTable(string $name, bool $refresh = false): ?DbTableSchema
     {
         if ($refresh === false && isset($this->_tables[$name]))
             return $this->_tables[$name];

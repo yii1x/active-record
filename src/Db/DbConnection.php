@@ -282,6 +282,10 @@ class DbConnection
      */
     public string $pdoClass = PDO::class;
 
+    public DbSchema $schema {
+        get => $this->getSchema();
+    }
+
     private $_driverName;
     private array $_attributes = [];
     private bool $_active = false;

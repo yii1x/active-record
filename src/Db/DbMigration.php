@@ -9,6 +9,8 @@
 namespace Yii1x\ActiveRecord\Db;
 
 use Exception;
+use ReflectionClass;
+use Yii1x\ActiveRecord\Attributes\Database;
 use Yii1x\ActiveRecord\ORMContext;
 
 /**
@@ -57,6 +59,7 @@ abstract class DbMigration
                 return false;
             }
             $transaction->commit();
+            return true;
         } catch (Exception $e) {
             echo "Exception: " . $e->getMessage() . ' (' . $e->getFile() . ':' . $e->getLine() . ")\n";
             echo $e->getTraceAsString() . "\n";
@@ -79,6 +82,7 @@ abstract class DbMigration
                 return false;
             }
             $transaction->commit();
+            return true;
         } catch (Exception $e) {
             echo "Exception: " . $e->getMessage() . ' (' . $e->getFile() . ':' . $e->getLine() . ")\n";
             echo $e->getTraceAsString() . "\n";
@@ -115,6 +119,15 @@ abstract class DbMigration
     {
     }
 
+    public function databaseName(): string
+    {
+        $reflection = new ReflectionClass($this);
+        if ($dbAttribute = current($reflection->getAttributes(Database::class))) {
+            return $dbAttribute->newInstance()->name;
+        }
+        return 'default';
+    }
+
     /**
      * Returns the currently active database connection.
      * By default, the 'db' application component will be returned and activated.
@@ -127,7 +140,7 @@ abstract class DbMigration
     public function getDbConnection()
     {
         if ($this->_db === null) {
-            $this->_db = ORMContext::db('db');
+            $this->_db = ORMContext::db($this->databaseName());
             if (!$this->_db instanceof DbConnection)
                 throw new Exception('The "db" application component must be configured to be a CDbConnection object.');
         }

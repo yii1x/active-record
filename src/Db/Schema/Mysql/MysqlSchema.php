@@ -166,7 +166,7 @@ class MysqlSchema extends DbSchema
         $sql = 'SHOW FULL COLUMNS FROM ' . $table->rawName;
         try {
             $columns = $this->getDbConnection()->createCommand($sql)->queryAll();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
         foreach ($columns as $column) {

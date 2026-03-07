@@ -13,7 +13,7 @@ class QueryBuilder
 
     public function __construct(protected ActiveRecord $model)
     {
-        $this->criteria = new DbCriteria();
+        $this->criteria = new DbCriteria(['alias' => 't']);
     }
 
     public function select(string|array $column): static

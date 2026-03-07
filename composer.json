@@ -21,5 +21,8 @@
         "psr/container": "^2.0",
         "psr/log": "^3.0",
         "psr/simple-cache": "^3.0"
+    },
+    "suggest": {
+        "symfony/console": "Required for migrate command (up/down/make/etc)"
     }
 }

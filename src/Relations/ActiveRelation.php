@@ -36,7 +36,7 @@ class ActiveRelation extends BaseActiveRelation
      * If this property is not set, the corresponding table will be joined with the primary table
      * only when the primary table is not limited.
      */
-    public bool $together;
+    public ?bool $together = null;
     /**
      * @var mixed scopes to apply
      * Can be set to the one of the following:
@@ -52,7 +52,7 @@ class ActiveRelation extends BaseActiveRelation
      * Defaults to null, meaning don't use any bridge.
      * @since 1.1.7
      */
-    public string $through;
+    public ?string $through = null;
 
     /**
      * Merges this relation with a criteria specified dynamically.

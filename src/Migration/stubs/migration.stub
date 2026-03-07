@@ -1,0 +1,19 @@
+<?php
+
+use Yii1x\ActiveRecord\Db\DbMigration;
+
+return new class extends DbMigration
+{
+	public function safeUp()
+	{
+	    // Your migration code here
+        // $this->createTable(...);
+	}
+
+	public function safeDown()
+	{
+	    // If rollback is supported, uncomment:
+        // $this->dropTable(...);
+        throw new \Exception('This migration does not support rollback');
+	}
+};

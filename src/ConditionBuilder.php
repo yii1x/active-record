@@ -73,6 +73,13 @@ class ConditionBuilder
      */
     public function whereRelation(string $relation, ?\Closure $callback = null, string $operator = 'AND', ?string $relAlias = null): static
     {
+        if (str_contains($relation, '.')) {
+            $parts = explode('.', $relation, 2);
+            // Рекурсивно строим условие
+            return $this->whereRelation($parts[0], fn(ConditionBuilder $builder) => $builder
+                ->whereRelation($parts[1], $callback), $operator, $relAlias);
+        }
+
         if (!$this->modelContext) {
             throw new DbException('Model context not set');
         }
@@ -80,27 +87,41 @@ class ConditionBuilder
         if (!$rel = $this->model->getActiveRelation($relation)) {
             throw new DbException('Relation "' . $relation . '" does not exist.');
         }
+        if ($rel->through) {
+            if (!$throughRel = $this->model->getActiveRelation($rel->through)) {
+                throw new DbException('Relation "' . $rel->through . '" does not exist.');
+            }
+            $model = ActiveRecord::model($throughRel->className);
+            $modelAlias = $rel->through;
+        } else {
+            $model = $this->model;
+            $modelAlias = $this->criteria->alias;
+        }
         $relAlias ??= $relation;
         $relModel = ActiveRecord::model($rel->className);
-        if ($rel instanceof BelongsToRelation) {
-            $fkMap = is_string($rel->foreignKey) ? [$rel->foreignKey => $this->model->getTableSchema()->primaryKey] : $rel->foreignKey;
-        } else {
-            $fkMap = is_string($rel->foreignKey) ? [$rel->foreignKey => $relModel->getTableSchema()->primaryKey] : $rel->foreignKey;
-            $fkMap = array_flip($fkMap);
-        }
-
         $conditionBuilder = new static($relModel, new DbCriteria(['select' => '1', 'alias' => $relAlias]));
         if ($callback) {
             $callback($conditionBuilder);
         }
+
+        if ($rel instanceof BelongsToRelation) {
+            $fkMap = is_string($rel->foreignKey) ? [$rel->foreignKey => $model->getTableSchema()->primaryKey] : $rel->foreignKey;
+        } else {
+            $fkMap = is_string($rel->foreignKey) ? [$relModel->getTableSchema()->primaryKey => $rel->foreignKey] : $rel->foreignKey;
+        }
+
         foreach ($fkMap as $pk => $fk) {
             if (is_array($pk) || is_array($fk)) {
                 throw new DbException("Relation '{$relation}' has composite key. " . "Define all fields explicitly in foreignKey array.");
             }
-            $conditionBuilder->whereRaw("{$relAlias}.{$fk} = {$this->criteria->alias}.{$pk}");
+            $conditionBuilder->whereRaw("{$relAlias}.{$fk} = {$modelAlias}.{$pk}");
         }
         $cmd = $relModel->commandBuilder->createFindCommand($relModel->tableName(), $conditionBuilder->criteria, $relAlias);
-        $this->whereRaw('EXISTS(' . $cmd->getText() . ')', $operator);
+        if ($rel->through) {
+            $this->whereRelation($rel->through, fn(ConditionBuilder $builder) => $builder->whereRaw('EXISTS(' . $cmd->getText() . ')'));
+        } else {
+            $this->whereRaw('EXISTS(' . $cmd->getText() . ')', $operator);
+        }
         $this->criteria->params += $conditionBuilder->criteria->params;
         return $this;
     }
