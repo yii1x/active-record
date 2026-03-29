@@ -3,6 +3,7 @@
 namespace Yii1x\ActiveRecord;
 
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 
@@ -23,6 +24,7 @@ final class ORMContext
 {
     protected static ?ContainerInterface $container = null;
     protected static bool $debug = false;
+    protected static bool $profile = false;
 
     /**
      * Initialize the global ORM context.
@@ -31,15 +33,21 @@ final class ORMContext
      * CacheInterface and LoggerInterface.
      * @param bool $debug Enable/disable debug logging.
      */
-    public static function bootstrap(ContainerInterface $container, bool $debug = false): void
+    public static function bootstrap(ContainerInterface $container, bool $debug = false, bool $profile = false): void
     {
         self::$container = $container;
         self::$debug = $debug;
+        self::$profile = $profile;
     }
 
     public static function isDebug(): bool
     {
         return self::$debug;
+    }
+
+    public static function isProfile(): bool
+    {
+        return self::$profile;
     }
 
     public static function container(): ?ContainerInterface
@@ -63,5 +71,11 @@ final class ORMContext
     public static function log(): ?LoggerInterface
     {
         return self::container()->get(LoggerInterface::class);
+    }
+
+    public static function dispatch(object $event): void
+    {
+        $eventDispatcher = self::container()->get(EventDispatcherInterface::class);
+        $eventDispatcher->dispatch($event);
     }
 }

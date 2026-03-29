@@ -304,7 +304,12 @@ class DbConnection
      * @param string $password The password for the DSN string.
      * @see https://www.php.net/manual/en/function.PDO-construct.php
      */
-    public function __construct(string $dsn = '', string $username = '', string $password = '')
+    public function __construct(
+        string $dsn,
+        string $username,
+        string $password,
+        public readonly string $connectionName,
+    )
     {
         $this->connectionString = $dsn;
         $this->username = $username;

@@ -31,7 +31,7 @@ php console migrate down -l 3
 php console migrate redo -l 2
 
 # Create new migration
-php console migrate make CreateUserTable
+php console migrate make --name=create_user_table
 
 # Show new migrations
 php console migrate new

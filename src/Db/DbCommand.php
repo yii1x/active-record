@@ -14,6 +14,7 @@ use Exception;
 use PDOException;
 use PDOStatement;
 use Yii1x\ActiveRecord\Db\Schema\DbExpression;
+use Yii1x\ActiveRecord\Events\EndQueryEvent;
 use Yii1x\ActiveRecord\Exceptions\DbException;
 use Yii1x\ActiveRecord\ORMContext;
 
@@ -323,12 +324,15 @@ class DbCommand
         } else
             $par = '';
         try {
-            $this->prepare();
-            if ($params === array())
-                $this->_statement->execute();
-            else
-                $this->_statement->execute($params);
-            return $this->_statement->rowCount();
+            return $this->profileQuery(function () use ($params) {
+                $this->prepare();
+                if ($params === [])
+                    $this->_statement->execute();
+                else
+                    $this->_statement->execute($params);
+                return $this->_statement->rowCount();
+            }, $this->getText(), $params);
+
         } catch (Exception $e) {
             $errorInfo = $e instanceof PDOException ? $e->errorInfo : null;
             $message = $e->getMessage();
@@ -477,20 +481,23 @@ class DbCommand
         }
 
         try {
-            $this->prepare();
-            if ($params === [])
-                $this->_statement->execute();
-            else
-                $this->_statement->execute($params);
+            $result = $this->profileQuery(function () use ($method, $params, $mode) {
+                $this->prepare();
+                if ($params === [])
+                    $this->_statement->execute();
+                else
+                    $this->_statement->execute($params);
 
-            if ($method === '')
-                $result = new DbDataReader($this);
-            else {
-                $mode = (array)$mode;
-                call_user_func_array(array($this->_statement, 'setFetchMode'), $mode);
-                $result = $this->_statement->$method();
-                $this->_statement->closeCursor();
-            }
+                if ($method === '')
+                    $result = new DbDataReader($this);
+                else {
+                    $mode = (array)$mode;
+                    call_user_func_array(array($this->_statement, 'setFetchMode'), $mode);
+                    $result = $this->_statement->$method();
+                    $this->_statement->closeCursor();
+                }
+                return $result;
+            }, $this->getText(), $params);
 
             if (isset($cache, $cacheKey))
                 $cache->set($cacheKey, array($result), $this->_connection->queryCachingDuration, $this->_connection->queryCachingDependency);
@@ -1579,5 +1586,24 @@ class DbCommand
     public function dropPrimaryKey(string $name, string $table): int
     {
         return $this->setText($this->getConnection()->getSchema()->dropPrimaryKey($name, $table))->execute();
+    }
+
+    public function profileQuery(\Closure $closure, string $sql, array $params = []): mixed
+    {
+        if (!ORMContext::isProfile()) {
+            return $closure();
+        }
+
+        $start = microtime(true);
+        $result = $closure();
+        ORMContext::dispatch(new EndQueryEvent(
+            bin2hex(random_bytes(8)),
+            $sql,
+            $params,
+            microtime(true) - $start,
+            $this->getConnection()->connectionName,
+            $this->getConnection(),
+        ));
+        return $result;
     }
 }
