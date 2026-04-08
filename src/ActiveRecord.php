@@ -1784,7 +1784,7 @@ abstract class ActiveRecord extends Model
      * @return static|null the newly created active record. The class of the object is the same as the model class.
      * Null is returned if the input data is false.
      */
-    public function populateRecord(array $attributes, bool $callAfterFind = true): ?static
+    public function populateRecord(array|false $attributes, bool $callAfterFind = true): ?static
     {
         if ($attributes) {
             $record = $this->instantiate($attributes);
@@ -1857,8 +1857,8 @@ abstract class ActiveRecord extends Model
         return $this->__isset($offset);
     }
 
-    public static function queryBuilder(): QueryBuilder
+    public static function queryBuilder(?DbCriteria $criteria = null): QueryBuilder
     {
-        return new QueryBuilder(static::model());
+        return new QueryBuilder(static::model(), $criteria);
     }
 }

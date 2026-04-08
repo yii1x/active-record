@@ -11,9 +11,9 @@ class QueryBuilder
         get => $this->conditionBuilder ?? new ConditionBuilder($this->model, $this->criteria);
     }
 
-    public function __construct(protected ActiveRecord $model)
+    public function __construct(protected ActiveRecord $model, ?DbCriteria $criteria = null)
     {
-        $this->criteria = new DbCriteria(['alias' => 't']);
+        $this->criteria = $criteria ?: new DbCriteria(['alias' => 't']);
     }
 
     public function select(string|array $column): static
@@ -31,6 +31,12 @@ class QueryBuilder
     public function limit(int $limit): static
     {
         $this->criteria->limit = $limit;
+        return $this;
+    }
+
+    public function offset(int $offset): static
+    {
+        $this->criteria->offset = $offset;
         return $this;
     }
 
@@ -70,18 +76,23 @@ class QueryBuilder
         return $this;
     }
 
+    public function count(): int
+    {
+        return $this->model->count(clone $this->criteria);
+    }
+
     public function find(): ?ActiveRecord
     {
-        return $this->model->find($this->criteria);
+        return $this->model->find(clone $this->criteria);
     }
 
     public function findAll(): array
     {
-        return $this->model->findAll($this->criteria);
+        return $this->model->findAll(clone $this->criteria);
     }
 
     public function deleteAll(): int
     {
-        return $this->model->deleteAll($this->criteria);
+        return $this->model->deleteAll(clone $this->criteria);
     }
 }
