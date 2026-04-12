@@ -52,6 +52,18 @@ class QueryBuilder
         return $this;
     }
 
+    public function scopes(string|array $scopes): static
+    {
+        $this->criteria->mergeWith(['scopes' => (array)$scopes]);
+        return $this;
+    }
+
+    public function like(string $column, string $value, $operator = 'AND'): static
+    {
+        $this->conditionBuilder->like($column, $value, $operator);
+        return $this;
+    }
+
     public function where(string|\Closure $column, mixed $comparison, mixed $value = null, $operator = 'AND'): static
     {
         $this->conditionBuilder->where($column, $comparison, $value, $operator);

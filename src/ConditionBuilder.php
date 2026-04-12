@@ -17,6 +17,12 @@ class ConditionBuilder
 
     }
 
+    public function like(string $column, string $value, $operator = 'AND'): static
+    {
+        $this->criteria->addCondition("$column LIKE " . $this->criteria->addParam($value), $operator);
+        return $this;
+    }
+
     public function where(string|\Closure $column, mixed $comparison = null, mixed $value = null, $operator = 'AND'): static
     {
         if ($column instanceof \Closure) {

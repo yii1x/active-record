@@ -612,4 +612,11 @@ class DbCriteria
             $result[$name] = $this->$name;
         return $result;
     }
+
+    public function addParam(string|int $value, ?string $name = null): string
+    {
+        $name ??= self::PARAM_PREFIX . self::$paramCount++;
+        $this->params[$name] = $value;
+        return $name;
+    }
 }

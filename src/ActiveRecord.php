@@ -8,22 +8,19 @@
 
 namespace Yii1x\ActiveRecord;
 
-use Yii1x\ActiveRecord\Db\{DbCommand, DbConnection};
-use Yii1x\ActiveRecord\Db\Schema\{DbCommandBuilder, DbCriteria, DbSchema, DbTableSchema};
 use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
-use Yii1x\ActiveRecord\Attributes\Database;
-use Yii1x\ActiveRecord\Attributes\Table;
+use Yii1x\ActiveRecord\Attributes\{Database, Table};
+use Yii1x\ActiveRecord\Db\{DbCommand, DbConnection};
+use Yii1x\ActiveRecord\Db\Schema\{DbCommandBuilder, DbCriteria, DbSchema, DbTableSchema};
 use Yii1x\ActiveRecord\Exceptions\DbException;
-use Yii1x\ActiveRecord\Model\Event;
-use Yii1x\ActiveRecord\Model\Model;
-use Yii1x\ActiveRecord\Model\ModelEvent;
-use Yii1x\ActiveRecord\Relations\ActiveRelation;
-use Yii1x\ActiveRecord\Relations\BelongsToRelation;
-use Yii1x\ActiveRecord\Relations\HasManyRelation;
-use Yii1x\ActiveRecord\Relations\HasOneRelation;
-use Yii1x\ActiveRecord\Relations\ManyManyRelation;
-use Yii1x\ActiveRecord\Relations\StatRelation;
+use Yii1x\ActiveRecord\Model\{Event, Model, ModelEvent};
+use Yii1x\ActiveRecord\Relations\{BaseActiveRelation,
+    BelongsToRelation,
+    HasManyRelation,
+    HasOneRelation,
+    ManyManyRelation,
+    StatRelation};
 
 /**
  * CActiveRecord is the base class for classes representing relational data.
@@ -658,9 +655,9 @@ abstract class ActiveRecord extends Model
     /**
      * Returns the named relation declared for this AR class.
      * @param string $name the relation name
-     * @return ActiveRelation the named relation declared for this AR class. Null if the relation does not exist.
+     * @return BaseActiveRelation|null the named relation declared for this AR class. Null if the relation does not exist.
      */
-    public function getActiveRelation(string $name): ?ActiveRelation
+    public function getActiveRelation(string $name): ?BaseActiveRelation
     {
         return isset($this->getMetaData()->relations[$name]) ? $this->getMetaData()->relations[$name] : null;
     }
